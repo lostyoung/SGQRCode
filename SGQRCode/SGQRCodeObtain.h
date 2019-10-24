@@ -60,6 +60,8 @@ typedef void(^SGQRCodeObtainAlbumResultBlock)(SGQRCodeObtain *obtain, NSString *
 #pragma mark - - 扫描二维码相关方法
 /** 创建扫描二维码方法 */
 - (void)establishQRCodeObtainScanWithController:(UIViewController *)controller configure:(SGQRCodeObtainConfigure *)configure;
+/** 创建扫描二维码方法 --- 显示在指定的 view 上 */
+- (void)establishQRCodeObtainScanWithController:(UIViewController *)controller previewView:(UIView *) view configure:(SGQRCodeObtainConfigure *)configure;
 /** 扫描二维码回调方法 */
 - (void)setBlockWithQRCodeObtainScanResult:(SGQRCodeObtainScanResultBlock)block;
 /** 扫描二维码光线强弱回调方法；调用之前配置属性 sampleBufferDelegate 必须为 YES */
