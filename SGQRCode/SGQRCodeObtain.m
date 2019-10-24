@@ -174,6 +174,58 @@
     [controller.view.layer insertSublayer:videoPreviewLayer atIndex:0];
 }
 
+#pragma mark - - 扫描二维码相关方法
+- (void)establishQRCodeObtainScanWithController:(UIViewController *)controller previewView:(UIView *) view configure:(SGQRCodeObtainConfigure *)configure {
+    if (controller == nil) {
+        @throw [NSException exceptionWithName:@"SGQRCode" reason:@"SGQRCodeObtain 中 establishQRCodeObtainScanWithController:configuration:方法的 controller 参数不能为空" userInfo:nil];
+    }
+    if (configure == nil) {
+        @throw [NSException exceptionWithName:@"SGQRCode" reason:@"SGQRCodeObtain 中 establishQRCodeObtainScanWithController:configure:方法的 configure 参数不能为空" userInfo:nil];
+    }
+    
+    _controller = controller;
+    _configure = configure;
+    
+    AVCaptureDevice *device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+    // 1、捕获设备输入流
+    AVCaptureDeviceInput *deviceInput = [AVCaptureDeviceInput deviceInputWithDevice:device error:nil];
+    // 2、捕获元数据输出流
+    AVCaptureMetadataOutput *metadataOutput = [[AVCaptureMetadataOutput alloc] init];
+    [metadataOutput setMetadataObjectsDelegate:self queue:dispatch_get_main_queue()];
+    
+    // 设置扫描范围（每一个取值 0 ～ 1，以屏幕右上角为坐标原点）
+    // 注：微信二维码的扫描范围是整个屏幕，这里并没有做处理（可不用设置）
+    if (configure.rectOfInterest.origin.x == 0 && configure.rectOfInterest.origin.y == 0 && configure.rectOfInterest.size.width == 0 && configure.rectOfInterest.size.height == 0) {
+    } else {
+        metadataOutput.rectOfInterest = configure.rectOfInterest;
+    }
+    
+    // 3、设置会话采集率
+    self.captureSession.sessionPreset = configure.sessionPreset;
+    
+    // 4(1)、添加捕获元数据输出流到会话对象
+    [_captureSession addOutput:metadataOutput];
+    // 4(2)、添加捕获输出流到会话对象；构成识了别光线强弱
+    if (configure.sampleBufferDelegate == YES) {
+        AVCaptureVideoDataOutput *videoDataOutput = [[AVCaptureVideoDataOutput alloc] init];
+        [videoDataOutput setSampleBufferDelegate:self queue:dispatch_get_main_queue()];
+        [_captureSession addOutput:videoDataOutput];
+    }
+    // 4(3)、添加捕获设备输入流到会话对象
+    [_captureSession addInput:deviceInput];
+    
+    // 5、设置数据输出类型，需要将数据输出添加到会话后，才能指定元数据类型，否则会报错
+    metadataOutput.metadataObjectTypes = configure.metadataObjectTypes;
+    
+    // 6、预览图层
+    AVCaptureVideoPreviewLayer *videoPreviewLayer = [AVCaptureVideoPreviewLayer layerWithSession:_captureSession];
+    // 保持纵横比，填充层边界
+    videoPreviewLayer.connection.videoOrientation = AVCaptureVideoOrientationLandscapeRight;
+    videoPreviewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
+    videoPreviewLayer.frame = CGRectMake(0, 0, view.frame.size.width, view.frame.size.height);
+    [view.layer insertSublayer:videoPreviewLayer atIndex:0];
+}
+
 - (AVCaptureSession *)captureSession {
     if (!_captureSession) {
         _captureSession = [[AVCaptureSession alloc] init];
