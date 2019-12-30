@@ -135,7 +135,29 @@
     _controller = controller;
     _configure = configure;
     
-    AVCaptureDevice *device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+    AVCaptureDevice *device = nil;
+    if(configure.useFrontDevice) {   //使用前置摄像头
+        NSArray *devices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
+        for (NSInteger index = 0; index<devices.count; index++) {
+            AVCaptureDevice *dev = devices[index];
+            if (dev.position == AVCaptureDevicePositionFront) { //
+                device = dev;
+                break;
+            }
+        }
+        
+        //使用前置摄像头的时候需要调整分辨率，否则很可能会出问题
+        NSArray *presetArray = @[AVCaptureSessionPresetHigh, AVCaptureSessionPresetMedium, AVCaptureSessionPresetLow];
+        for (NSInteger index=0;index<presetArray.count;index++) {
+            if ([device supportsAVCaptureSessionPreset:presetArray[index]]) {
+                _configure.sessionPreset = presetArray[index];
+                break;
+            }
+        }
+    } else {    //使用默认摄像头
+        device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+    }
+    
     // 1、捕获设备输入流
     AVCaptureDeviceInput *deviceInput = [AVCaptureDeviceInput deviceInputWithDevice:device error:nil];
     // 2、捕获元数据输出流
@@ -186,7 +208,29 @@
     _controller = controller;
     _configure = configure;
     
-    AVCaptureDevice *device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+    AVCaptureDevice *device = nil;
+    if(configure.useFrontDevice) {   //使用前置摄像头
+        NSArray *devices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
+        for (NSInteger index = 0; index<devices.count; index++) {
+            AVCaptureDevice *dev = devices[index];
+            if (dev.position == AVCaptureDevicePositionFront) { //
+                device = dev;
+                break;
+            }
+        }
+        
+        //使用前置摄像头的时候需要调整分辨率，否则很可能会出问题
+        NSArray *presetArray = @[AVCaptureSessionPresetHigh, AVCaptureSessionPresetMedium, AVCaptureSessionPresetLow];
+        for (NSInteger index=0;index<presetArray.count;index++) {
+            if ([device supportsAVCaptureSessionPreset:presetArray[index]]) {
+                _configure.sessionPreset = presetArray[index];
+                break;
+            }
+        }
+    } else {    //使用默认摄像头
+        device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+    }
+    
     // 1、捕获设备输入流
     AVCaptureDeviceInput *deviceInput = [AVCaptureDeviceInput deviceInputWithDevice:device error:nil];
     // 2、捕获元数据输出流

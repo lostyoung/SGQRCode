@@ -24,4 +24,7 @@
 /** 打印信息，默认为：NO */
 @property (nonatomic, assign) BOOL openLog;
 
+/** 使用前置摄像头，默认为：NO */
+@property (nonatomic, assign) BOOL useFrontDevice;
+
 @end
